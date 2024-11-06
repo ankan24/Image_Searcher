@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://imgs.search.brave.com/4sk19fsjCOUyoR5sPwC_TVJLcY9skTjeYnhqIzEruCw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA3LzExLzI4Lzk0/LzM2MF9GXzcxMTI4/OTQ5NV96M3FWWjRx/d0daZTByQ2tWc0I2/YzdJZTRIU09PbUN1/MS5qcGc">
+    <title>Image Searcher</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: rgb(229, 231, 235);
+        }
+
+        .search-form {
+            background-color: white;
+            width: 100%;
+            height: 40px;
+            max-width: 450px;
+            margin: 50px auto;
+            display: flex;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .search-form input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            padding: 5px;
+            padding-left: 10px;
+        }
+
+        .search-form button {
+            border: none;
+            outline: none;
+            letter-spacing: 1px;
+            font-weight: 600;
+            background-color: rgb(37, 99, 235);
+            color: white;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+
+        .search-form button:hover {
+            background-color: rgb(6, 73, 219);
+        }
+
+        .resultImage {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        .resultImage img {
+            width: 260px;
+            height: 260px;
+            border-radius: 5px;
+        }
+
+        .show-more {
+            background-color: rgb(37, 99, 235);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            width: fit-content;
+            margin: auto;
+            display: block;
+            cursor: pointer;
+        }
+
+        .show-more:hover {
+            background-color: rgb(6, 73, 219);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <form class="search-form" id="searchForm">
+        <input type="text" placeholder="Search image here..." id="searchInput" />
+        <button>Search</button>
+    </form>
+    <div class="resultImage"></div>
+    <button class="show-more hidden">Show more</button>
+
+</body>
+<script>
+    const searchInput = document.getElementById("searchInput")
+    const searchForm = document.getElementById("searchForm")
+    const resultImage = document.querySelector(".resultImage")
+    const showMoreBtn = document.querySelector(".show-more")
+
+    const accessKey = "9v0nSDV1h31kPT0N0JKlFz2HsHVlVG69G4qKAVMDYs0"
+    let page = 1
+
+    const fetchData = async () => {
+        const url = `https://api.unsplash.com/search/collections?page=${page}&query=${searchInput.value}&client_id=${accessKey}`
+
+        const response = await fetch(url)
+        const data = await response.json()
+        return data
+    }
+
+    const renderData = (data = []) => {
+        data.results.map(imageData => {
+            const img = document.createElement('img')
+            img.src = imageData.cover_photo.urls.small
+
+            const imgLink = document.createElement("a")
+            imgLink.href = imageData.links.self
+
+            imgLink.appendChild(img)
+            resultImage.appendChild(imgLink)
+
+        })
+    }
+
+    const handleShowMoreImage = async () => {
+        ++page
+        const responeData = await fetchData()
+        renderData(responeData)
+    }
+
+    searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        page = 1
+
+        const data = await fetchData()
+
+        resultImage.innerHTML = ""
+
+        renderData(data)
+
+        showMoreBtn.classList.remove('hidden')
+
+        console.log("data", data)
+    })
+
+
+
+
+    showMoreBtn.addEventListener("click", async () => {
+        handleShowMoreImage()
+    })
+
+
+    window.addEventListener("scroll", () => {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+            handleShowMoreImage()
+        }
+    })
+
+</script>
+
+</html>
